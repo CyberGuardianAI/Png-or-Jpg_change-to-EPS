@@ -1,0 +1,117 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import Image
+import pytesseract
+
+
+# 设置Tesseract路径（如果安装在非默认路径，需要设置）
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# 设置输入路径和输出路径
+def select_folder():
+    # 选择文件夹
+    folder_selected = filedialog.askdirectory()
+    if folder_selected:
+        input_folder_var.set(folder_selected)
+        output_folder = os.path.join(folder_selected, "OCR_Output")
+        output_folder_var.set(output_folder)
+        os.makedirs(output_folder, exist_ok=True)  # 如果不存在，创建输出文件夹
+
+
+def ocr_images():
+    input_folder = input_folder_var.get()
+    output_folder = output_folder_var.get()
+
+    if not input_folder:
+        messagebox.showerror("错误", "请选择输入文件夹！")
+        return
+
+    if not os.path.exists(input_folder):
+        messagebox.showerror("错误", "输入文件夹路径无效！")
+        return
+
+    # 支持的图片扩展名
+    valid_extensions = ['.png', '.jpg', '.jpeg', '.bmp']
+
+    success_count = 0
+    error_count = 0
+    text_results = []
+
+    # 遍历文件夹
+    for filename in os.listdir(input_folder):
+        file_path = os.path.join(input_folder, filename)
+        # 检查文件是否是图片格式
+        if any(filename.lower().endswith(ext) for ext in valid_extensions):
+            try:
+                # 打开图片
+                with Image.open(file_path) as img:
+                    # 使用Tesseract OCR识别图片中的文字
+                    text = pytesseract.image_to_string(img, lang='chi_sim')  # 选择中文识别，若是英文使用 'eng'
+
+                    # 记录识别的文字结果
+                    text_results.append(f"--- {filename} ---\n{text}\n\n")
+                    success_count += 1
+                    print(f"成功识别文字: {filename}")
+            except Exception as e:
+                error_count += 1
+                print(f"文件处理错误 {filename}: {e}")
+        else:
+            print(f"跳过非图片文件: {filename}")
+
+    if text_results:
+        try:
+            # 构建输出文本文件路径
+            output_text_path = os.path.join(output_folder, "ocr_results.txt")
+            # 将识别的文字写入到文本文件中
+            with open(output_text_path, 'w', encoding='utf-8') as f:
+                f.writelines(text_results)
+            messagebox.showinfo("完成",
+                                f"文字识别完成！成功识别 {success_count} 张图片，失败 {error_count} 张。结果已保存到ocr_results.txt。")
+        except Exception as e:
+            messagebox.showerror("错误", f"保存识别结果失败: {e}")
+    else:
+        messagebox.showwarning("警告", "未识别到任何文字！")
+
+
+# 创建主界面
+root = tk.Tk()
+root.title("图片文字识别（OCR）")
+
+# 设置界面尺寸和背景颜色
+root.geometry("500x400")
+root.config(bg="#f0f0f0")
+
+# 输入文件夹选择
+input_folder_var = tk.StringVar()
+output_folder_var = tk.StringVar()
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 输入文件夹路径选择
+input_folder_label = tk.Label(root, text="选择图片文件夹:", font=("Arial", 12), bg="#f0f0f0")
+input_folder_label.pack(pady=5)
+
+input_folder_entry = tk.Entry(root, textvariable=input_folder_var, width=40, font=("Arial", 12))
+input_folder_entry.pack(pady=5)
+
+select_folder_button = tk.Button(root, text="选择文件夹", command=select_folder, width=20, height=2, font=("Arial", 12),
+                                 bg="#4CAF50", fg="white", relief="raised")
+select_folder_button.pack(pady=10)
+
+# 输出文件夹路径
+output_folder_label = tk.Label(root, text="输出文件夹:", font=("Arial", 12), bg="#f0f0f0")
+output_folder_label.pack(pady=5)
+
+output_folder_entry = tk.Entry(root, textvariable=output_folder_var, width=40, font=("Arial", 12), state="readonly")
+output_folder_entry.pack(pady=5)
+
+# 转换按钮
+convert_button = tk.Button(root, text="开始识别文字", command=ocr_images, width=20, height=2, font=("Arial", 12),
+                           bg="#007bff", fg="white", relief="raised")
+convert_button.pack(pady=20)
+
+# 运行界面
+root.mainloop()
