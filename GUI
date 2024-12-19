@@ -1,0 +1,92 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from Chang_EPS import convert_images_to_eps  # 图片转EPS
+from Chang_PDF import convert_to_pdf       # 其他格式转PDF
+from High_resolution_pictures import enhance_image_resolution  # 提升分辨率
+from PDF_to_word import convert_pdf_to_word  # PDF转Word
+from auto_translate import translate_text  # 自动翻译
+from photo_to_word import convert_image_to_word  # 图片转Word
+
+def select_folder():
+    """选择文件夹并返回选择的路径"""
+    folder_selected = filedialog.askdirectory()
+    if folder_selected:
+        input_folder_var.set(folder_selected)
+        messagebox.showinfo("选择文件夹", f"已选择文件夹：{folder_selected}")
+    return folder_selected
+
+def process_files(input_folder):
+    """遍历文件夹中的文件并根据文件类型调用相应的处理功能"""
+    success_count = 0
+    error_count = 0
+    
+    # 遍历文件夹中的文件
+    for filename in os.listdir(input_folder):
+        file_path = os.path.join(input_folder, filename)
+        
+        # 判断文件类型并进行处理
+        try:
+            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                # 图片转换为EPS格式
+                convert_images_to_eps(file_path)
+                success_count += 1
+                print(f"成功转换为EPS格式: {filename}")
+
+            elif filename.lower().endswith(('.pdf')):
+                # PDF转换为Word
+                convert_pdf_to_word(file_path)
+                success_count += 1
+                print(f"成功转换为Word格式: {filename}")
+
+            elif filename.lower().endswith(('.docx', '.txt')):
+                # 自动翻译文件内容
+                translate_text(file_path)
+                success_count += 1
+                print(f"成功翻译文件: {filename}")
+
+            elif filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+                # 提升图片分辨率
+                enhance_image_resolution(file_path)
+                success_count += 1
+                print(f"成功提升分辨率: {filename}")
+
+            else:
+                print(f"跳过非支持文件格式: {filename}")
+
+        except Exception as e:
+            error_count += 1
+            print(f"处理失败: {filename}, 错误: {e}")
+
+    messagebox.showinfo("处理完成", f"批量处理完成！成功处理 {success_count} 个文件，失败 {error_count} 个文件。")
+
+# 创建GUI界面
+root = tk.Tk()
+root.title("批量处理文件夹中的文件")
+root.geometry("500x300")  # 设置界面大小
+root.config(bg="#f0f0f0")  # 设置背景颜色
+
+# 输入文件夹选择
+input_folder_var = tk.StringVar()
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 选择文件夹按钮
+select_folder_button = tk.Button(root, text="选择文件夹", command=lambda: select_folder(), width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", relief="raised")
+select_folder_button.pack(pady=20)
+
+# 处理文件按钮
+process_button = tk.Button(root, text="开始批量处理", command=lambda: process_files(input_folder_var.get()), width=20, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised")
+process_button.pack(pady=20)
+
+# 文件夹路径显示
+input_folder_label = tk.Label(root, text="选择的文件夹：", font=("Arial", 12), bg="#f0f0f0")
+input_folder_label.pack(pady=5)
+
+folder_path_label = tk.Label(root, textvariable=input_folder_var, font=("Arial", 12), bg="#f0f0f0", width=40, anchor="w")
+folder_path_label.pack(pady=5)
+
+# 运行界面
+root.mainloop()
