@@ -1,0 +1,81 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from tkinter import simpledialog
+import os
+
+# 各个功能模块的占位符函数
+def add_toc_pdf():
+    messagebox.showinfo("功能未实现", "自动为PDF添加目录的功能尚未实现！")
+
+def add_toc_word():
+    messagebox.showinfo("功能未实现", "自动为Word添加目录的功能尚未实现！")
+
+def convert_images_to_eps():
+    messagebox.showinfo("功能未实现", "图片转换为EPS的功能尚未实现！")
+
+def convert_to_pdf():
+    messagebox.showinfo("功能未实现", "将文件转换为PDF的功能尚未实现！")
+
+def enhance_images_resolution():
+    messagebox.showinfo("功能未实现", "提升图片分辨率的功能尚未实现！")
+
+def convert_pdf_to_word():
+    messagebox.showinfo("功能未实现", "PDF转Word的功能尚未实现！")
+
+def translate_document():
+    messagebox.showinfo("功能未实现", "翻译文档的功能尚未实现！")
+
+def convert_photo_to_word():
+    messagebox.showinfo("功能未实现", "图片转Word的功能尚未实现！")
+
+# 创建主界面
+root = tk.Tk()
+root.title("统一功能界面")
+
+# 设置界面尺寸
+root.geometry("600x500")
+root.config(bg="#f0f0f0")
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 添加欢迎标签
+welcome_label = tk.Label(root, text="欢迎使用文档处理工具", font=("Arial", 16, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+welcome_label.pack(pady=20)
+
+# 功能模块按钮
+button_frame = tk.Frame(root, bg="#f0f0f0")
+button_frame.pack(pady=20)
+
+# 各个功能的按钮
+button_add_toc_pdf = tk.Button(button_frame, text="自动为PDF添加目录", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=add_toc_pdf)
+button_add_toc_pdf.grid(row=0, column=0, padx=10, pady=10)
+
+button_add_toc_word = tk.Button(button_frame, text="自动为Word添加目录", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=add_toc_word)
+button_add_toc_word.grid(row=1, column=0, padx=10, pady=10)
+
+button_convert_images_to_eps = tk.Button(button_frame, text="图片转EPS格式", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=convert_images_to_eps)
+button_convert_images_to_eps.grid(row=2, column=0, padx=10, pady=10)
+
+button_convert_to_pdf = tk.Button(button_frame, text="文件转换为PDF", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=convert_to_pdf)
+button_convert_to_pdf.grid(row=3, column=0, padx=10, pady=10)
+
+button_enhance_images_resolution = tk.Button(button_frame, text="提升图片分辨率", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=enhance_images_resolution)
+button_enhance_images_resolution.grid(row=4, column=0, padx=10, pady=10)
+
+button_convert_pdf_to_word = tk.Button(button_frame, text="PDF转Word", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=convert_pdf_to_word)
+button_convert_pdf_to_word.grid(row=5, column=0, padx=10, pady=10)
+
+button_translate_document = tk.Button(button_frame, text="翻译文档", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=translate_document)
+button_translate_document.grid(row=6, column=0, padx=10, pady=10)
+
+button_convert_photo_to_word = tk.Button(button_frame, text="图片转Word", width=40, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised", command=convert_photo_to_word)
+button_convert_photo_to_word.grid(row=7, column=0, padx=10, pady=10)
+
+# 退出按钮
+exit_button = tk.Button(root, text="退出", command=root.quit, width=20, height=2, font=("Arial", 12), bg="#f44336", fg="white", relief="raised")
+exit_button.pack(pady=20)
+
+# 运行界面
+root.mainloop()
