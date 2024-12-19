@@ -1,0 +1,141 @@
+import os
+import subprocess
+import nltk
+from tkinter import Tk, Label, Button, Entry, Text, Scrollbar
+from tkinter import messagebox
+import matplotlib.pyplot as plt
+import matplotlib.backends.backend_agg as agg
+from docx import Document
+from docx.shared import Inches
+
+# 初始化 NLTK
+nltk.download('punkt')
+
+
+# 聊天机器人
+class ChatBot:
+    def __init__(self):
+        self.commands = {
+            "help": self.help,
+            "line_count": self.count_lines,
+            "convert_latex": self.convert_latex_to_word,
+            "show_code_lines": self.show_code_lines,
+            "convert_pdf_to_word": self.convert_pdf_to_word,
+        }
+
+    def process_message(self, message):
+        message = message.lower()
+        words = nltk.word_tokenize(message)
+
+        # 识别是否有命令
+        for command in self.commands:
+            if command in words:
+                return self.commands[command](message)
+        return self.chat(message)
+
+    def help(self, message):
+        return """我可以帮你做以下事情：
+        1. `line_count`：统计代码行数
+        2. `convert_latex`：将 LaTeX 公式转换为 Word 文件
+        3. `show_code_lines`：显示仓库代码行数
+        4. `convert_pdf_to_word`：将 PDF 转换为 Word
+        5. `help`：显示帮助信息"""
+
+    def chat(self, message):
+        return "你好！请告诉我你需要什么帮助？"
+
+    def count_lines(self, message):
+        try:
+            result = subprocess.run(["cloc", "."], capture_output=True, text=True)
+            return f"代码行数统计：\n{result.stdout}"
+        except Exception as e:
+            return f"出错了，无法统计代码行数：{e}"
+
+    def convert_latex_to_word(self, message):
+        latex_code = "x^2 + y^2 = z^2"  # 示例公式
+        try:
+            img_path = self.render_latex_to_image(latex_code)
+            doc = Document()
+            doc.add_paragraph(f"LaTeX公式：{latex_code}")
+            doc.add_picture(img_path, width=Inches(2))
+            word_file = "output_with_latex.docx"
+            doc.save(word_file)
+            return f"Word文档已生成，包含LaTeX公式，文件名：{word_file}"
+        except Exception as e:
+            return f"出错了，无法将LaTeX公式转换为Word：{e}"
+
+    def render_latex_to_image(self, latex_code):
+        """ 将LaTeX公式渲染为图片并返回图片路径 """
+        fig, ax = plt.subplots(figsize=(4, 2))
+        ax.text(0.5, 0.5, f"${latex_code}$", size=30, ha='center', va='center')
+        ax.axis('off')
+        img_path = "temp_formula.png"
+        agg_backend = agg.FigureCanvasAgg(fig)
+        agg_backend.print_figure(img_path)
+        plt.close(fig)
+        return img_path
+
+    def show_code_lines(self, message):
+        folder_path = os.getcwd()
+        try:
+            result = subprocess.run(["git", "ls-files", "|", "cloc"], capture_output=True, text=True, cwd=folder_path)
+            return f"代码行数：\n{result.stdout}"
+        except Exception as e:
+            return f"出错了，无法显示代码行数：{e}"
+
+    def convert_pdf_to_word(self, message):
+        return "PDF转换为Word功能将在这里实现"
+
+
+# GUI部分
+class ChatBotGUI:
+    def __init__(self, root, chatbot):
+        self.root = root
+        self.root.title("自动聊天机器人")
+        self.chatbot = chatbot
+
+        # 创建GUI元素
+        self.chat_box = Text(root, width=50, height=15, wrap="word")
+        self.chat_box.pack(padx=10, pady=10)
+
+        self.scrollbar = Scrollbar(root, command=self.chat_box.yview)
+        self.scrollbar.pack(side="right", fill="y")
+
+        self.chat_box.config(yscrollcommand=self.scrollbar.set)
+
+        self.input_box = Entry(root, width=40)
+        self.input_box.pack(padx=10, pady=10)
+
+        self.send_button = Button(root, text="发送", command=self.send_message)
+        self.send_button.pack(pady=10)
+
+        # 显示欢迎消息
+        self.chat_box.insert("end", "你好！我是你的自动助手。可以输入'help'来获取帮助。\n")
+        self.chat_box.config(state="disabled")
+
+    def send_message(self):
+        message = self.input_box.get()
+        if message.strip():
+            self.chat_box.config(state="normal")
+            self.chat_box.insert("end", f"你: {message}\n")
+            response = self.chatbot.process_message(message)
+            self.chat_box.insert("end", f"机器人: {response}\n\n")
+            self.chat_box.config(state="disabled")
+            self.chat_box.yview("end")
+        self.input_box.delete(0, "end")
+
+
+# 启动聊天机器人
+if __name__ == "__main__":
+    # 创建聊天机器人
+    chatbot = ChatBot()
+
+    # 创建GUI窗口
+    root = Tk()
+    root.geometry("600x500")
+
+    # 创建聊天窗口
+    gui = ChatBotGUI(root, chatbot)
+
+    # 运行GUI应用
+    root.mainloop()
