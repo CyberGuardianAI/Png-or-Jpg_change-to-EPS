@@ -1,0 +1,102 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+import fitz  # PyMuPDF
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+# 设置输入路径和输出路径
+def select_pdf_file():
+    # 选择PDF文件
+    file_selected = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+    if file_selected:
+        input_pdf_var.set(file_selected)
+        output_pdf = os.path.splitext(file_selected)[0] + "_with_toc.pdf"
+        output_pdf_var.set(output_pdf)
+
+def add_toc_to_pdf():
+    input_pdf = input_pdf_var.get()
+    output_pdf = output_pdf_var.get()
+
+    if not input_pdf:
+        messagebox.showerror("错误", "请选择PDF文件！")
+        return
+
+    if not os.path.exists(input_pdf):
+        messagebox.showerror("错误", "PDF文件路径无效！")
+        return
+
+    try:
+        # 读取PDF文件
+        doc = fitz.open(input_pdf)
+
+        # 提取标题文本（假设标题在特定的字号或字体中）
+        toc_items = []
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            text = page.get_text("text")
+            lines = text.split('\n')
+            for line in lines:
+                if line.strip().startswith('Chapter') or line.strip().startswith('Section'):
+                    toc_items.append(line.strip())
+        
+        # 创建新PDF，插入目录
+        c = canvas.Canvas(output_pdf, pagesize=letter)
+        c.drawString(100, 750, "目录")
+        y_position = 730
+        for item in toc_items:
+            c.drawString(100, y_position, item)
+            y_position -= 20
+        c.showPage()
+        c.save()
+
+        # 添加目录页到原PDF
+        new_pdf = fitz.open(output_pdf)
+        new_pdf.insert_pdf(doc, start_page=0)
+        new_pdf.save(output_pdf)
+
+        messagebox.showinfo("完成", f"PDF文件已成功添加目录并保存为 {output_pdf}")
+        print(f"PDF文件已成功添加目录：{output_pdf}")
+    except Exception as e:
+        messagebox.showerror("错误", f"转换失败：{e}")
+        print(f"转换失败：{e}")
+
+# 创建主界面
+root = tk.Tk()
+root.title("为PDF文件自动添加目录")
+
+# 设置界面尺寸和背景颜色
+root.geometry("500x400")
+root.config(bg="#f0f0f0")
+
+# 输入PDF文件选择
+input_pdf_var = tk.StringVar()
+output_pdf_var = tk.StringVar()
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 输入PDF文件选择
+input_pdf_label = tk.Label(root, text="选择PDF文件:", font=("Arial", 12), bg="#f0f0f0")
+input_pdf_label.pack(pady=5)
+
+input_pdf_entry = tk.Entry(root, textvariable=input_pdf_var, width=40, font=("Arial", 12))
+input_pdf_entry.pack(pady=5)
+
+select_pdf_button = tk.Button(root, text="选择PDF文件", command=select_pdf_file, width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", relief="raised")
+select_pdf_button.pack(pady=10)
+
+# 输出PDF文件路径
+output_pdf_label = tk.Label(root, text="输出PDF文件:", font=("Arial", 12), bg="#f0f0f0")
+output_pdf_label.pack(pady=5)
+
+output_pdf_entry = tk.Entry(root, textvariable=output_pdf_var, width=40, font=("Arial", 12), state="readonly")
+output_pdf_entry.pack(pady=5)
+
+# 转换按钮
+convert_button = tk.Button(root, text="开始添加目录", command=add_toc_to_pdf, width=20, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised")
+convert_button.pack(pady=20)
+
+# 运行界面
+root.mainloop()
