@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, UnidentifiedImageError
 
-
 # 设置输入路径和输出路径
 def select_folder():
     # 选择文件夹
@@ -76,30 +75,37 @@ def convert_images():
 root = tk.Tk()
 root.title("图片转换与压缩为EPS")
 
-# 设置界面尺寸
-root.geometry("400x300")
+# 设置界面尺寸和背景颜色
+root.geometry("500x400")
+root.config(bg="#f0f0f0")
 
 # 输入文件夹选择
 input_folder_var = tk.StringVar()
 output_folder_var = tk.StringVar()
 
-input_folder_label = tk.Label(root, text="选择图片文件夹:")
-input_folder_label.pack(pady=10)
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
 
-input_folder_entry = tk.Entry(root, textvariable=input_folder_var, width=40)
+# 输入文件夹路径选择
+input_folder_label = tk.Label(root, text="选择图片文件夹:", font=("Arial", 12), bg="#f0f0f0")
+input_folder_label.pack(pady=5)
+
+input_folder_entry = tk.Entry(root, textvariable=input_folder_var, width=40, font=("Arial", 12))
 input_folder_entry.pack(pady=5)
 
-select_folder_button = tk.Button(root, text="选择文件夹", command=select_folder)
+select_folder_button = tk.Button(root, text="选择文件夹", command=select_folder, width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", relief="raised")
 select_folder_button.pack(pady=10)
 
-output_folder_label = tk.Label(root, text="输出文件夹:")
-output_folder_label.pack(pady=10)
+# 输出文件夹路径
+output_folder_label = tk.Label(root, text="输出文件夹:", font=("Arial", 12), bg="#f0f0f0")
+output_folder_label.pack(pady=5)
 
-output_folder_entry = tk.Entry(root, textvariable=output_folder_var, width=40, state='readonly')
+output_folder_entry = tk.Entry(root, textvariable=output_folder_var, width=40, font=("Arial", 12), state="readonly")
 output_folder_entry.pack(pady=5)
 
 # 转换按钮
-convert_button = tk.Button(root, text="开始转换", command=convert_images)
+convert_button = tk.Button(root, text="开始转换", command=convert_images, width=20, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised")
 convert_button.pack(pady=20)
 
 # 运行界面
