@@ -1,0 +1,94 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.shared import Pt
+
+# 设置输入路径和输出路径
+def select_word_file():
+    # 选择Word文件
+    file_selected = filedialog.askopenfilename(filetypes=[("Word Files", "*.docx")])
+    if file_selected:
+        input_word_var.set(file_selected)
+        output_word = os.path.splitext(file_selected)[0] + "_with_toc.docx"
+        output_word_var.set(output_word)
+
+def add_toc_to_word():
+    input_word = input_word_var.get()
+    output_word = output_word_var.get()
+
+    if not input_word:
+        messagebox.showerror("错误", "请选择Word文件！")
+        return
+
+    if not os.path.exists(input_word):
+        messagebox.showerror("错误", "Word文件路径无效！")
+        return
+
+    try:
+        doc = Document(input_word)
+        
+        # 插入目录
+        toc_paragraph = doc.add_paragraph("目录", style="Heading 1")
+        toc_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # 提取标题并生成目录
+        toc_items = []
+        for para in doc.paragraphs:
+            if para.style.name.startswith('Heading'):
+                level = int(para.style.name.split(' ')[1])
+                toc_items.append((para.text, level))
+        
+        # 添加目录项
+        for title, level in toc_items:
+            toc_paragraph = doc.add_paragraph(f"{title}", style=f"Heading {level}")
+            toc_paragraph.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        
+        # 保存新文档
+        doc.save(output_word)
+        messagebox.showinfo("完成", f"目录已成功添加到 {output_word}")
+        print(f"目录已成功添加到 {output_word}")
+    except Exception as e:
+        messagebox.showerror("错误", f"转换失败：{e}")
+        print(f"转换失败：{e}")
+
+# 创建主界面
+root = tk.Tk()
+root.title("为Word文件自动添加目录")
+
+# 设置界面尺寸和背景颜色
+root.geometry("500x400")
+root.config(bg="#f0f0f0")
+
+# 输入Word文件选择
+input_word_var = tk.StringVar()
+output_word_var = tk.StringVar()
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 输入Word文件选择
+input_word_label = tk.Label(root, text="选择Word文件:", font=("Arial", 12), bg="#f0f0f0")
+input_word_label.pack(pady=5)
+
+input_word_entry = tk.Entry(root, textvariable=input_word_var, width=40, font=("Arial", 12))
+input_word_entry.pack(pady=5)
+
+select_word_button = tk.Button(root, text="选择Word文件", command=select_word_file, width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", relief="raised")
+select_word_button.pack(pady=10)
+
+# 输出Word文件路径
+output_word_label = tk.Label(root, text="输出Word文件:", font=("Arial", 12), bg="#f0f0f0")
+output_word_label.pack(pady=5)
+
+output_word_entry = tk.Entry(root, textvariable=output_word_var, width=40, font=("Arial", 12), state="readonly")
+output_word_entry.pack(pady=5)
+
+# 转换按钮
+convert_button = tk.Button(root, text="开始添加目录", command=add_toc_to_word, width=20, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised")
+convert_button.pack(pady=20)
+
+# 运行界面
+root.mainloop()
