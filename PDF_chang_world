@@ -1,0 +1,76 @@
+import os
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from pdf2docx import Converter
+
+# 设置输入路径和输出路径
+def select_pdf_file():
+    # 选择PDF文件
+    file_selected = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+    if file_selected:
+        input_pdf_var.set(file_selected)
+        output_docx = os.path.splitext(file_selected)[0] + ".docx"
+        output_docx_var.set(output_docx)
+
+def convert_pdf_to_word():
+    input_pdf = input_pdf_var.get()
+    output_docx = output_docx_var.get()
+
+    if not input_pdf:
+        messagebox.showerror("错误", "请选择PDF文件！")
+        return
+
+    if not os.path.exists(input_pdf):
+        messagebox.showerror("错误", "PDF文件路径无效！")
+        return
+
+    try:
+        # PDF转Word转换
+        cv = Converter(input_pdf)
+        cv.convert(output_docx, start=0, end=None)
+        cv.close()
+        messagebox.showinfo("完成", f"PDF转换成功！已保存为 {output_docx}")
+        print(f"PDF转换成功：{input_pdf} -> {output_docx}")
+    except Exception as e:
+        messagebox.showerror("错误", f"转换失败：{e}")
+        print(f"转换失败：{e}")
+
+# 创建主界面
+root = tk.Tk()
+root.title("PDF转Word工具")
+
+# 设置界面尺寸和背景颜色
+root.geometry("500x400")
+root.config(bg="#f0f0f0")
+
+# 输入PDF文件选择
+input_pdf_var = tk.StringVar()
+output_docx_var = tk.StringVar()
+
+# 添加“暨南大学网络空间安全学院”标注
+college_label = tk.Label(root, text="暨南大学网络空间安全学院", font=("Arial", 14, "bold"), fg="#2f4f4f", bg="#f0f0f0")
+college_label.pack(pady=10)
+
+# 输入PDF文件选择
+input_pdf_label = tk.Label(root, text="选择PDF文件:", font=("Arial", 12), bg="#f0f0f0")
+input_pdf_label.pack(pady=5)
+
+input_pdf_entry = tk.Entry(root, textvariable=input_pdf_var, width=40, font=("Arial", 12))
+input_pdf_entry.pack(pady=5)
+
+select_pdf_button = tk.Button(root, text="选择PDF文件", command=select_pdf_file, width=20, height=2, font=("Arial", 12), bg="#4CAF50", fg="white", relief="raised")
+select_pdf_button.pack(pady=10)
+
+# 输出Word文件路径
+output_docx_label = tk.Label(root, text="输出Word文件:", font=("Arial", 12), bg="#f0f0f0")
+output_docx_label.pack(pady=5)
+
+output_docx_entry = tk.Entry(root, textvariable=output_docx_var, width=40, font=("Arial", 12), state="readonly")
+output_docx_entry.pack(pady=5)
+
+# 转换按钮
+convert_button = tk.Button(root, text="开始转换", command=convert_pdf_to_word, width=20, height=2, font=("Arial", 12), bg="#007bff", fg="white", relief="raised")
+convert_button.pack(pady=20)
+
+# 运行界面
+root.mainloop()
